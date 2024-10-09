@@ -1,5 +1,7 @@
 # rkv
 
+rkv is a distributed KV system based on raft consensus. It's easy to use、expand or develop.
+
 ## Quick Start
 
 1. First build the binary excutable file
@@ -37,7 +39,7 @@ bar
 ```
 5. You can check the servers in cluster
 
-```
+```bash
 # curl 'http://127.0.0.1:10002/servers'
 [{"addr":"127.0.0.1:10001","id":"1"},{"addr":"127.0.0.1:10003","id":"2"},{"addr":"127.0.0.1:10005","id":"3"}]
 ```
