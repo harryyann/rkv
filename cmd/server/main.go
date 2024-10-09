@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
+	http2 "rkv/pkg/protocol/http"
 	"time"
 
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb/v2"
 
-	"rkv/internal/fsm"
+	"rkv/pkg/fsm"
 )
 
 const (
@@ -21,8 +24,8 @@ const (
 	defaultConnTimeout   = 3 * time.Second
 	defaultSnapshotCount = 5
 
-	defaultServerAddr = "localhost:10001"
-	defaultRaftAddr   = "localhost:10002"
+	defaultRaftAddr   = "127.0.0.1:10001"
+	defaultServerAddr = "127.0.0.1:10002"
 	defaultDataDir    = "/tmp/rkv/"
 )
 
@@ -39,10 +42,10 @@ var (
 
 func init() {
 	flag.StringVar(&serverAddr, "server-addr", defaultServerAddr, "server address access by client")
-	flag.StringVar(&raftAddr, "raft-addr", defaultRaftAddr, "raft bind address")
+	flag.StringVar(&raftAddr, "raft-addr", defaultRaftAddr, "server bind address")
 	flag.StringVar(&joinAddr, "join", "", "the join address, if not set, this node will run as bootstrap")
 	flag.StringVar(&nodeId, "id", "", "the node unique id")
-	flag.StringVar(&dataDir, "data-dir", defaultDataDir, "raft data directory")
+	flag.StringVar(&dataDir, "data-dir", defaultDataDir, "server data directory")
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(os.Stderr, "Usage: %s [options] \n", os.Args[0])
 		flag.PrintDefaults()
@@ -60,14 +63,22 @@ func main() {
 	}
 
 	// Setup new raft server
-	_, err := setupRaft()
+	store, err := setupRaft()
 	if err != nil {
-		log.Fatalf("Failed to setup Raft: %v", err)
+		log.Fatalf("Failed to setup raft: %v", err)
 	}
 
-	// TODO Setup HTTP protocol server
+	// Setup client access server
+	s, err := http2.NewHServ(http2.WithBindAddr(serverAddr), http2.WithStore(store))
+	if err != nil {
+		log.Fatalf("Failed to create server: %v", err)
+	}
+	err = s.Startup()
+	if err != nil {
+		log.Fatalf("Failed to startup server: %v", err)
+	}
 
-	log.Printf("rkv server listening at %s - %s", serverAddr, raftAddr)
+	log.Printf("[INFO] rkv: raft server listening at %s/%s", raftAddr, serverAddr)
 	signalNotify()
 }
 
@@ -89,7 +100,7 @@ func signalNotify() {
 	log.Printf("rkv node [%s] quitting", nodeId)
 }
 
-func setupRaft() (*fsm.HashStore, error) {
+func setupRaft() (fsm.Store, error) {
 	// Construct Config
 	conf := raft.DefaultConfig()
 	conf.LocalID = raft.ServerID(nodeId)
@@ -105,11 +116,11 @@ func setupRaft() (*fsm.HashStore, error) {
 	}
 
 	// Create LogStore and StableStore
-	logStore, err := raftboltdb.NewBoltStore(filepath.Join(dataDir, "raft-log.db"))
+	logStore, err := raftboltdb.NewBoltStore(filepath.Join(dataDir, "server-log.db"))
 	if err != nil {
 		return nil, err
 	}
-	stableStore, err := raftboltdb.NewBoltStore(filepath.Join(dataDir, "raft-stable.db"))
+	stableStore, err := raftboltdb.NewBoltStore(filepath.Join(dataDir, "server-stable.db"))
 	if err != nil {
 		return nil, err
 	}
@@ -128,16 +139,39 @@ func setupRaft() (*fsm.HashStore, error) {
 	}
 	store.SetupRaft(ra)
 
+	// Startup server node base on whether it is the first node.
+	// Only Leader can handle other nodes' joining, so if not bootstrap, send request to Leader.
 	if bootstrap {
-		cf := raft.Configuration{
-			Servers: []raft.Server{
-				{
-					ID:      serverId,
-					Address: transport.LocalAddr(),
-				},
-			},
+		bootstrapCluster(ra)
+	} else {
+		if err := joinCluster(); err != nil {
+			return nil, err
 		}
-		ra.BootstrapCluster(cf)
 	}
 	return store, nil
+}
+
+func bootstrapCluster(ra *raft.Raft) {
+	cf := raft.Configuration{
+		Servers: []raft.Server{
+			{
+				ID:      serverId,
+				Address: raft.ServerAddress(raftAddr),
+			},
+		},
+	}
+	ra.BootstrapCluster(cf)
+}
+
+func joinCluster() error {
+	params := url.Values{}
+	params.Add("addr", raftAddr)
+	urlStr := fmt.Sprintf("http://%s/nodes/%s?%s", joinAddr, nodeId, params.Encode())
+	resp, err := http.Post(urlStr, "application/json", nil)
+	if err != nil {
+		return err
+	}
+	log.Printf("[INFO] Join cluster, url: %s, status: %s", urlStr, resp.Status)
+	defer resp.Body.Close()
+	return nil
 }
