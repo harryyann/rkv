@@ -25,14 +25,19 @@ go build -o bin/rkvd cmd/server/main.go
 
 4. Try set a key connect to the leader
 
+set a key
 ```bash
 curl -X POST 'http://127.0.0.1:10002/keys/foo?val=bar'
 ```
+
+get the key
 ```bash
-    curl 'http://127.0.0.1:10002/keys/foo'
-    bar
+# curl 'http://127.0.0.1:10002/keys/foo'
+bar
 ```
 5. You can check the servers in cluster
-   curl 'http://127.0.0.1:10002/servers'
-   [{"addr":"127.0.0.1:10001","id":"1"},{"addr":"127.0.0.1:10003","id":"2"},{"addr":"127.0.0.1:10005","id":"3"}]
----
+
+```
+# curl 'http://127.0.0.1:10002/servers'
+[{"addr":"127.0.0.1:10001","id":"1"},{"addr":"127.0.0.1:10003","id":"2"},{"addr":"127.0.0.1:10005","id":"3"}]
+```
