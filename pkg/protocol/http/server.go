@@ -291,8 +291,8 @@ func (h *HServ) validLeader() (map[string]string, error) {
 	if state != raft.Leader.String() {
 		leaderId, leaderAddr := h.store.Leader()
 		resp := map[string]string{
-			"leaderId":   leaderId,
-			"leaderAddr": leaderAddr,
+			"leaderId":       leaderId,
+			"leaderRaftAddr": leaderAddr,
 		}
 		return resp, nil
 	}
