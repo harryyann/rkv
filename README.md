@@ -10,6 +10,14 @@ The following example can start a three-node rkv cluster.
 
 `Note: Please ensure that ports 10001, 10002, 10003, 10004, 10005, and 10006 are not occupied. You can also specify other ports in the startup parameters.`
 
+### Quick start by docker-compose
+
+You can quickly start a three-node rkv cluster by calling the startup.sh script。
+```bash
+chmod +x hack/startup.sh
+./hack/startup.sh
+```
+
 ### Manual binary mode
 
 **1. First build the binary excutable file**
