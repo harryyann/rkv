@@ -18,7 +18,7 @@ cd rkv/
 go build -o bin/rkvd cmd/server/main.go
 ```
 
-2. Start the filed node
+2. Start the first node
 
 ```bash
 ./bin/rkvd --id 1
