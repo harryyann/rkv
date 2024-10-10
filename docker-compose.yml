@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  rkvd-node1:
+    image: rkvd:v0.0.1
+    container_name: rkvd-node1
+    ports:
+      - "10001:10001"  # Server address
+      - "10002:10002"  # Raft address
+    command: ["--id", "1"]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:10002/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - rkv-network
+
+  rkvd-node2:
+    image: rkvd:v0.0.1
+    container_name: rkvd-node2
+    ports:
+      - "10003:10003"
+      - "10004:10004"
+    command: ["--id", "2", "--raft-addr", "127.0.0.1:10003", "--server-addr", "127.0.0.1:10004", "--join", "127.0.0.1:10002"]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:10004/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      - rkvd-node1
+    networks:
+      - rkv-network
+
+  rkvd-node3:
+    image: rkvd:v0.0.1
+    container_name: rkvd-node3
+    ports:
+      - "10005:10005"
+      - "10006:10006"
+    command: ["--id", "3", "--raft-addr", "127.0.0.1:10005", "--server-addr", "127.0.0.1:10006", "--join", "127.0.0.1:10002"]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:10006/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      - rkvd-node2
+    networks:
+      - rkv-network
+
+networks:
+  rkv-network:
+    driver: bridge
