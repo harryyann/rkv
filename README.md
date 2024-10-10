@@ -2,7 +2,7 @@
 
 [中文文档](https://github.com/harryyann/rkv/blob/main/doc/README.zh.md)
 
-rkv is a distributed KV system based on raft consensus. It's eliable enough，easy to use、expand ond develop.
+rkv is a distributed KV system based on raft consensus. It's reliable enough, easy to use and expand.
 
 ## Quick Start
 
