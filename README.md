@@ -12,19 +12,19 @@ The following example can start a three-node rkv cluster.
 
 ### Manual binary mode
 
-1. First build the binary excutable file
+**1. First build the binary excutable file**
 ```bash
 cd rkv/
 go build -o bin/rkvd cmd/server/main.go
 ```
 
-2. Start the first node
+**2. Start the first node**
 
 ```bash
 ./bin/rkvd --id 1
 ```
 
-3. Then start the second and third node
+**3. Then start the second and third node**
 
 ```bash
 ./bin/rkvd --id 2 --join 127.0.0.1:10002 --raft-addr 127.0.0.1:10003 --server-addr 127.0.0.1:10004 --data-dir /tmp/rkv2/
@@ -33,7 +33,7 @@ go build -o bin/rkvd cmd/server/main.go
 ./bin/rkvd --id 3 --join 127.0.0.1:10002 --raft-addr 127.0.0.1:10005 --server-addr 127.0.0.1:10006 --data-dir /tmp/rkv3/
 ```
 
-4. Try set a key connect to the leader
+**4. Try set a key connect to the leader**
 
 set a key
 ```bash
@@ -45,7 +45,8 @@ get the key
 # curl 'http://127.0.0.1:10002/keys/foo'
 bar
 ```
-5. You can check the servers in cluster
+
+You also can check how many nodes in cluster
 
 ```bash
 # curl 'http://127.0.0.1:10002/servers'
