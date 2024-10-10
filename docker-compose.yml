@@ -7,7 +7,7 @@ services:
     ports:
       - "10001:10001"  # Server address
       - "10002:10002"  # Raft address
-    command: ["--id", "1", "--raft-addr", "rkvd-node1:10003", "--server-addr", "rkvd-node1:10004"]
+    command: ["--id", "1", "--raft-addr", "rkvd-node1:10001", "--server-addr", "rkvd-node1:10002"]
     restart: on-failure
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://rkvd-node1:10002/health" ]
