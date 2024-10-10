@@ -70,34 +70,5 @@ go build -o bin/rkvd cmd/server/main.go
 ```bash
 ./bin/rkvd --id 3 --join 127.0.0.1:10002 --raft-addr 127.0.0.1:10005 --server-addr 127.0.0.1:10006 --data-dir /tmp/rkv3/
 ```
-
-### Manual docker mode 
-
-1. Build the image
-```bash
-docker build -t rkvd:v0.0.1 .
-```
-2. Start the first rkv node
-```bash
-docker run -di --network=host --name rkvd-node-1 rkvd:v0.0.1 --id 1
-```
-3. Start the second and third nodes
-```bash
-docker run -di --network=host --name rkvd-node-2 rkvd:v0.0.1 --id 2 --raft-addr 127.0.0.1:10003 --server-addr 127.0.0.1:10004 --join 127.0.0.1:10002
-```
-
-```bash
-docker run -di --network=host --name rkvd-node-3 rkvd:v0.0.1 --id 3 --raft-addr 127.0.0.1:10005 --server-addr 127.0.0.1:10006 --join 127.0.0.1:10002
-```
-
-All containers are as follows:
-```bash
-# docker ps                                                                                                                                           
-CONTAINER ID   IMAGE                  COMMAND                  CREATED              STATUS              PORTS                       NAMES
-b3dfe0b31e83   rkvd:v0.0.1            "/app/rkvd --id 3 --…"   16 seconds ago       Up 15 seconds                                   rkvd-node-3
-0c50af113c9d   rkvd:v0.0.1            "/app/rkvd --id 2 --…"   About a minute ago   Up About a minute                               rkvd-node-2
-3c29bd84e48c   rkvd:v0.0.1            "/app/rkvd --id 1"       3 minutes ago        Up 3 minutes                                    rkvd-node-1
-```
 ---
-
 You can check the [design documents]() and source code to learn more about the features.

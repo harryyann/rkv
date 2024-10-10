@@ -171,6 +171,9 @@ func joinCluster() error {
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("join cluster failed, status code: %d", resp.StatusCode)
+	}
 	log.Printf("[INFO] Join cluster, url: %s, status: %s", urlStr, resp.Status)
 	defer resp.Body.Close()
 	return nil

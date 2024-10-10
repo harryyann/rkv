@@ -7,10 +7,10 @@ services:
     ports:
       - "10001:10001"  # Server address
       - "10002:10002"  # Raft address
-    command: ["--id", "1"]
+    command: ["--id", "1", "--raft-addr", "rkvd-node1:10003", "--server-addr", "rkvd-node1:10004"]
     restart: on-failure
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:10002/health" ]
+      test: [ "CMD", "curl", "-f", "http://rkvd-node1:10002/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -24,10 +24,10 @@ services:
     ports:
       - "10003:10003"
       - "10004:10004"
-    command: ["--id", "2", "--raft-addr", "127.0.0.1:10003", "--server-addr", "127.0.0.1:10004", "--join", "127.0.0.1:10002"]
+    command: ["--id", "2", "--raft-addr", "rkvd-node2:10003", "--server-addr", "rkvd-node2:10004", "--join", "rkvd-node1:10002"]
     restart: on-failure
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:10004/health" ]
+      test: [ "CMD", "curl", "-f", "http://rkvd-node2:10004/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -43,10 +43,10 @@ services:
     ports:
       - "10005:10005"
       - "10006:10006"
-    command: ["--id", "3", "--raft-addr", "127.0.0.1:10005", "--server-addr", "127.0.0.1:10006", "--join", "127.0.0.1:10002"]
+    command: ["--id", "3", "--raft-addr", "rkvd-node3:10005", "--server-addr", "rkvd-node3:10006", "--join", "rkvd-node1:10002"]
     restart: on-failure
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:10006/health" ]
+      test: [ "CMD", "curl", "-f", "http://rkvd-node3:10006/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
