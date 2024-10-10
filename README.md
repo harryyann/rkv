@@ -25,27 +25,33 @@ f4572975d916   rkvd:v0.0.1            "/app/rkvd --id 3 --…"    3 minutes ago 
 0bc09339b783   rkvd:v0.0.1            "/app/rkvd --id 2 --…"    4 minutes ago   Up 2 minutes (healthy)          0.0.0.0:10003-10004->10003-10004/tcp   rkvd-node2
 fda902aff12a   rkvd:v0.0.1            "/app/rkvd --id 1"        4 minutes ago   Up 3 minutes (healthy)          0.0.0.0:10001-10002->10001-10002/tcp   rkvd-node1
 ```
-You can exec into one of the containers and connect to the cluster by curl.
+You can try connect to the cluster by curl.
 
-**4. Try set a key connect to the leader**
-
-set a key
+Set a key.
 ```bash
 curl -X POST 'http://127.0.0.1:10002/keys/foo?val=bar'
 ```
 
-get the key
+Get the key.
 ```bash
 # curl 'http://127.0.0.1:10002/keys/foo'
 bar
 ```
 
-You also can check how many nodes in cluster
+You also can check how many nodes in cluster.
 
 ```bash
 # curl 'http://127.0.0.1:10002/servers'
 [{"addr":"127.0.0.1:10001","id":"1"},{"addr":"127.0.0.1:10003","id":"2"},{"addr":"127.0.0.1:10005","id":"3"}]
 ```
+
+Get node's role
+```bash
+# curl 'http://127.0.0.1:10002/state'
+Leader
+```
+
+You can check the [design documents]() and source code to learn more APIs and features.
 
 
 ### Manual binary mode
@@ -71,4 +77,3 @@ go build -o bin/rkvd cmd/server/main.go
 ./bin/rkvd --id 3 --join 127.0.0.1:10002 --raft-addr 127.0.0.1:10005 --server-addr 127.0.0.1:10006 --data-dir /tmp/rkv3/
 ```
 ---
-You can check the [design documents]() and source code to learn more about the features.
