@@ -11,10 +11,10 @@ services:
     restart: on-failure
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://rkvd-node1:10002/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
+      interval: 6s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
     networks:
       - rkv-network
 
@@ -28,10 +28,10 @@ services:
     restart: on-failure
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://rkvd-node2:10004/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
+      interval: 6s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
     depends_on:
       - rkvd-node1
     networks:
@@ -47,10 +47,10 @@ services:
     restart: on-failure
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://rkvd-node3:10006/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
+      interval: 6s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
     depends_on:
       - rkvd-node2
     networks:
