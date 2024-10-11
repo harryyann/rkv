@@ -30,7 +30,7 @@ type Store interface {
 	// Leader returns which node is Leader.
 	Leader() (string, string)
 
-	// Stats show current node stats, used for debugging.
+	// Stats show stats of every node, used for debugging.
 	Stats() map[string]string
 
 	// Servers show current servers in cluster
