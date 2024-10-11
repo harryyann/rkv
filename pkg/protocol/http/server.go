@@ -2,14 +2,15 @@ package http
 
 import (
 	"encoding/json"
-	"github.com/hashicorp/raft"
 	"log"
 	"net/http"
 	"os"
 
 	"rkv/pkg/fsm"
+	"rkv/pkg/store"
 
 	"github.com/gorilla/mux"
+	"github.com/hashicorp/raft"
 )
 
 const (
@@ -17,13 +18,19 @@ const (
 )
 
 type HServ struct {
-	bindAddr string
-
 	logger *log.Logger
 
+	// HTTP Server bind address
+	bindAddr string
+
+	// Mux Router, dispatch requests
 	router *mux.Router
 
-	store fsm.Store
+	// Hold raft operation
+	store store.Store
+
+	// Query keys
+	fsm *fsm.FSM
 }
 
 func NewHServ(options ...Option) (*HServ, error) {
@@ -144,7 +151,7 @@ func (h *HServ) HandleKey(w http.ResponseWriter, r *http.Request) {
 	key := vars["key"]
 	switch r.Method {
 	case http.MethodGet:
-		val := h.store.Get(key)
+		val := h.fsm.Get(key)
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(val))
 		if err != nil {
@@ -179,7 +186,7 @@ func (h *HServ) HandleKey(w http.ResponseWriter, r *http.Request) {
 func (h *HServ) handleKeys(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		keys, err := json.Marshal(h.store.Keys())
+		keys, err := json.Marshal(h.fsm.Keys())
 		if err != nil {
 			h.logger.Println("Error marshalling keys: ", err)
 		} else {
@@ -307,8 +314,14 @@ func WithBindAddr(bindAddr string) Option {
 	}
 }
 
-func WithStore(store fsm.Store) Option {
+func WithStore(store store.Store) Option {
 	return func(hs *HServ) {
 		hs.store = store
+	}
+}
+
+func WithFSM(f *fsm.FSM) Option {
+	return func(hs *HServ) {
+		hs.fsm = f
 	}
 }

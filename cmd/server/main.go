@@ -10,13 +10,14 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	http2 "rkv/pkg/protocol/http"
 	"time"
 
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb/v2"
+	http2 "rkv/pkg/protocol/http"
 
 	"rkv/pkg/fsm"
+	"rkv/pkg/store"
 )
 
 const (
@@ -62,17 +63,22 @@ func main() {
 		log.Fatalf("Failed to create data dir: %s, error: %s", dataDir, err.Error())
 	}
 
-	// Setup new raft server
-	store, err := setupRaft()
+	// Create fsm.
+	f := fsm.NewFSMMachine()
+
+	// Setup and run new raft node.
+	ra, err := setupRaft(f)
 	if err != nil {
 		log.Fatalf("Failed to setup raft: %v", err)
 	}
+	st := store.NewRaftStore(ra)
 
-	// Setup client access server
-	s, err := http2.NewHServ(http2.WithBindAddr(serverAddr), http2.WithStore(store))
+	// Create client access server
+	s, err := http2.NewHServ(http2.WithBindAddr(serverAddr), http2.WithStore(st), http2.WithFSM(f))
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}
+
 	err = s.Startup()
 	if err != nil {
 		log.Fatalf("Failed to startup server: %v", err)
@@ -100,7 +106,7 @@ func signalNotify() {
 	log.Printf("rkv node [%s] quitting", nodeId)
 }
 
-func setupRaft() (fsm.Store, error) {
+func setupRaft(f *fsm.FSM) (*raft.Raft, error) {
 	// Construct Config
 	conf := raft.DefaultConfig()
 	conf.LocalID = raft.ServerID(nodeId)
@@ -131,13 +137,10 @@ func setupRaft() (fsm.Store, error) {
 		return nil, err
 	}
 
-	// Create the FSM Store
-	store := fsm.NewHashStore()
-	ra, err := raft.NewRaft(conf, (*fsm.FSM)(store), logStore, stableStore, snapshots, transport)
+	ra, err := raft.NewRaft(conf, f, logStore, stableStore, snapshots, transport)
 	if err != nil {
 		return nil, err
 	}
-	store.SetupRaft(ra)
 
 	// Startup server node base on whether it is the first node.
 	// Only Leader can handle other nodes' joining, so if not bootstrap, send request to Leader.
@@ -148,7 +151,7 @@ func setupRaft() (fsm.Store, error) {
 			return nil, err
 		}
 	}
-	return store, nil
+	return ra, nil
 }
 
 func bootstrapCluster(ra *raft.Raft) {
