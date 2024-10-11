@@ -21,7 +21,7 @@ type machine struct {
 
 type FSM machine
 
-func NewFSMMachine() *FSM {
+func NewFSMachine() *FSM {
 	m := machine{
 		m:      sync.Map{},
 		logger: log.New(os.Stdout, "[fsm] ", log.LstdFlags),
