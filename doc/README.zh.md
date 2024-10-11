@@ -48,7 +48,7 @@ bar
 Leader
 ```
 
-您可以查看[设计文档]()和代码了解更多API和功能。
+您可以查看[设计文档](https://yanghairui.life/archives/ji-yu-hashicorp-raftshi-xian-yi-ge-fen-bu-shi-kvxi-tong)和代码了解更多API和功能。
 
 ### 通过二进制方式运行
 1. 首先构建可执行的二进制文件

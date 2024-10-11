@@ -25,7 +25,7 @@ f4572975d916   rkvd:v0.0.1            "/app/rkvd --id 3 --…"    3 minutes ago 
 0bc09339b783   rkvd:v0.0.1            "/app/rkvd --id 2 --…"    4 minutes ago   Up 2 minutes (healthy)          0.0.0.0:10003-10004->10003-10004/tcp   rkvd-node2
 fda902aff12a   rkvd:v0.0.1            "/app/rkvd --id 1"        4 minutes ago   Up 3 minutes (healthy)          0.0.0.0:10001-10002->10001-10002/tcp   rkvd-node1
 ```
-You can try connect to the cluster by curl.
+You can try to connect the cluster by curl.
 
 Set a key.
 ```bash
@@ -51,7 +51,7 @@ Get node's role
 Leader
 ```
 
-You can check the [design documents]() and source code to learn more APIs and features.
+You can check the [design documents](https://yanghairui.life/archives/ji-yu-hashicorp-raftshi-xian-yi-ge-fen-bu-shi-kvxi-tong) and source code to learn more APIs and features.
 
 
 ### Manual binary mode
