@@ -65,6 +65,8 @@ func (f *FSM) Snapshot() (raft.FSMSnapshot, error) {
 
 // Restore stores the key-value store to a previous state.
 func (f *FSM) Restore(rc io.ReadCloser) error {
+	// TODO Restore from snapshots.
+	// Just ignore previous snapshot here.
 	f.m = sync.Map{}
 	return nil
 }
